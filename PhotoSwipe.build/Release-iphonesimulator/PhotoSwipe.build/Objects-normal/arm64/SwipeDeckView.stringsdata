@@ -1,0 +1,48 @@
+{
+  "source": "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Views/SwipeDeckView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Pick a day, currently %@",
+        "location": {
+          "startingColumn": 33,
+          "startingLine": 93
+        }
+      },
+      {
+        "comment": "",
+        "key": "Undo last swipe",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 103
+        }
+      },
+      {
+        "comment": "",
+        "key": "Pick a day",
+        "location": {
+          "startingColumn": 33,
+          "startingLine": 115
+        }
+      },
+      {
+        "comment": "",
+        "key": "On This Day",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 82
+        }
+      },
+      {
+        "comment": "",
+        "key": "Pick a day",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 108
+        }
+      }
+    ]
+  },
+  "version": 1
+}

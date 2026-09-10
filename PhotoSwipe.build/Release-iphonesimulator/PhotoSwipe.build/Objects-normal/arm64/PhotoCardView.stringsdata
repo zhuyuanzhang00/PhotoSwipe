@@ -1,0 +1,40 @@
+{
+  "source": "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Views/PhotoCardView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Undo last swipe",
+        "location": {
+          "startingColumn": 41,
+          "startingLine": 129
+        }
+      },
+      {
+        "comment": "",
+        "key": "Undo last swipe",
+        "location": {
+          "startingColumn": 45,
+          "startingLine": 83
+        }
+      },
+      {
+        "comment": "",
+        "key": "Share photo",
+        "location": {
+          "startingColumn": 45,
+          "startingLine": 100
+        }
+      },
+      {
+        "comment": "",
+        "key": "Mark photo for deletion",
+        "location": {
+          "startingColumn": 45,
+          "startingLine": 110
+        }
+      }
+    ]
+  },
+  "version": 1
+}

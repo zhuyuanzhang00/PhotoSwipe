@@ -1,0 +1,48 @@
+{
+  "source": "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Views/ConfirmationView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Review",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 72
+        }
+      },
+      {
+        "comment": "",
+        "key": "These photos will be moved to Recently Deleted. You can recover them from the Photos app for 30 days.",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 17
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 60
+        }
+      },
+      {
+        "comment": "",
+        "key": "Move to Trash",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 49
+        }
+      },
+      {
+        "comment": "",
+        "key": "Undo",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 78
+        }
+      }
+    ]
+  },
+  "version": 1
+}

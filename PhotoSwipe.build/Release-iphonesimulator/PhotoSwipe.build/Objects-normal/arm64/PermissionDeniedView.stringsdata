@@ -1,0 +1,32 @@
+{
+  "source": "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Views/PermissionDeniedView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Photo Access Required",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 12
+        }
+      },
+      {
+        "comment": "",
+        "key": "PhotoSwipe needs access to your library to show On This Day memories and move photos you delete to Trash. Enable access in Settings to continue.",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 16
+        }
+      },
+      {
+        "comment": "",
+        "key": "Open Settings",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 22
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,12 @@
+{
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Models/PhotoItem.swift" : {
+    "abi-baseline-json" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe.abi.json",
+    "const-values" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe-primary.swiftconstvalues",
+    "dependencies" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe-primary.d",
+    "diagnostics" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe-primary.dia",
+    "objc-header" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe-Swift.h",
+    "swiftdoc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe.swiftdoc",
+    "swiftmodule" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe.swiftmodule",
+    "swiftsourceinfo" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe.swiftsourceinfo"
+  }
+}

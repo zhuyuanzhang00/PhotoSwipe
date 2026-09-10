@@ -1,0 +1,86 @@
+{
+  "" : {
+    "const-values" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe-primary.swiftconstvalues",
+    "dependencies" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe-primary.d",
+    "diagnostics" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe-primary.dia",
+    "emit-module-dependencies" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe-primary-emit-module.dia",
+    "pch" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipe-primary.swiftdeps"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/ContentView.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/ContentView.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Models/PhotoItem.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoItem.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoItem.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoItem.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/PhotoSwipeApp.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipeApp.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipeApp.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoSwipeApp.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Services/CompletedDaysBackend.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/CompletedDaysBackend.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/CompletedDaysBackend.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/CompletedDaysBackend.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Services/PhotoImageLoader.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoImageLoader.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoImageLoader.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoImageLoader.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Services/PhotoLibraryService.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoLibraryService.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoLibraryService.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoLibraryService.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/ViewModels/CurationViewModel.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/CurationViewModel.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/CurationViewModel.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/CurationViewModel.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Views/CalendarShareViews.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/CalendarShareViews.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/CalendarShareViews.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/CalendarShareViews.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Views/ConfirmationView.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/ConfirmationView.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/ConfirmationView.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/ConfirmationView.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Views/EndOfQueueView.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/EndOfQueueView.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/EndOfQueueView.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/EndOfQueueView.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Views/PermissionDeniedView.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PermissionDeniedView.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PermissionDeniedView.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PermissionDeniedView.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Views/PhotoCardView.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoCardView.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoCardView.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoCardView.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Views/PhotoImageView.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoImageView.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoImageView.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/PhotoImageView.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Views/SwipeDeckView.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/SwipeDeckView.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/SwipeDeckView.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/SwipeDeckView.o"
+  },
+  "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "index-unit-output-path" : "/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/jonathanzhang/Desktop/PhotoSwipe/build/PhotoSwipe.build/Release-iphonesimulator/PhotoSwipe.build/Objects-normal/arm64/GeneratedAssetSymbols.o"
+  }
+}

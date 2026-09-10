@@ -1,0 +1,72 @@
+{
+  "source": "/Users/jonathanzhang/Desktop/PhotoSwipe/PhotoSwipe/Views/EndOfQueueView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "End of Queue",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 15
+        }
+      },
+      {
+        "comment": "",
+        "key": "Pick another day",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 26
+        }
+      },
+      {
+        "comment": "",
+        "key": "Undo last photo",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 41
+        }
+      },
+      {
+        "comment": "",
+        "key": "Pick a Day",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 95
+        }
+      },
+      {
+        "comment": "",
+        "key": "PhotoSwipe matches month and day across every year in your library.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 85
+        }
+      },
+      {
+        "comment": "",
+        "key": "Completed days",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 80
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 101
+        }
+      },
+      {
+        "comment": "",
+        "key": "Load",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 104
+        }
+      }
+    ]
+  },
+  "version": 1
+}
