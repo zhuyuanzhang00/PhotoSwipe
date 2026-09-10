@@ -8,6 +8,8 @@ struct SwipeDeckView: View {
     @Environment(\.displayScale) private var displayScale
     @State private var dragOffset: CGSize = .zero
     @State private var isFlinging = false
+    @State private var sharePayload: SharePayload?
+    @State private var isPreparingShare = false
 
     private let swipeThreshold: CGFloat = 120
 
@@ -24,8 +26,10 @@ struct SwipeDeckView: View {
                         dragOffset: .zero,
                         showsChrome: false,
                         canUndo: false,
+                        isSharing: false,
                         onDelete: {},
-                        onUndo: {}
+                        onUndo: {},
+                        onShare: {}
                     )
                     .id(next.id)
                     .scaleEffect(0.96)
@@ -42,8 +46,10 @@ struct SwipeDeckView: View {
                         dragOffset: dragOffset,
                         showsChrome: true,
                         canUndo: viewModel.canUndo,
+                        isSharing: isPreparingShare,
                         onDelete: { fling(.delete, width: proxy.size.width) },
-                        onUndo: { undoLast() }
+                        onUndo: { undoLast() },
+                        onShare: { shareCurrent() }
                     )
                     .id(current.id)
                     .padding(cardPadding)
@@ -59,6 +65,9 @@ struct SwipeDeckView: View {
             .onChange(of: proxy.size) {
                 viewModel.updateCacheTarget(size: proxy.size, scale: displayScale)
             }
+            .sheet(item: $sharePayload) { payload in
+                ShareSheet(items: payload.items)
+            }
         }
     }
 
@@ -68,16 +77,20 @@ struct SwipeDeckView: View {
 
     private var deckHeader: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("On This Day")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                Text(viewModel.selectedDayTitle)
-                    .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.7))
+            Button(action: onPickDay) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("On This Day")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                    Text(viewModel.selectedDayTitle)
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
             }
-
-            Spacer()
+            .buttonStyle(.plain)
+            .accessibilityLabel("Pick a day, currently \(viewModel.selectedDayTitle)")
 
             if viewModel.canUndo {
                 Button(action: { undoLast() }) {
@@ -91,17 +104,15 @@ struct SwipeDeckView: View {
                 .padding(.trailing, 8)
             }
 
-            if viewModel.hasUnlockedDayPicker {
-                Button(action: onPickDay) {
-                    Label("Pick a day", systemImage: "calendar")
-                        .labelStyle(.iconOnly)
-                        .font(.title3)
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .background(.white.opacity(0.12), in: Circle())
-                }
-                .accessibilityLabel("Pick a day")
+            Button(action: onPickDay) {
+                Label("Pick a day", systemImage: "calendar")
+                    .labelStyle(.iconOnly)
+                    .font(.title3)
+                    .foregroundStyle(.white)
+                    .frame(width: 44, height: 44)
+                    .background(.white.opacity(0.12), in: Circle())
             }
+            .accessibilityLabel("Pick a day")
         }
         .padding(.horizontal, 20)
         .padding(.top, 6)
@@ -159,6 +170,15 @@ struct SwipeDeckView: View {
         withAnimation(.spring(response: 0.32, dampingFraction: 0.86)) {
             dragOffset = .zero
             viewModel.undoLast()
+        }
+    }
+
+    private func shareCurrent() {
+        guard !isPreparingShare, !isFlinging else { return }
+        isPreparingShare = true
+        Task {
+            sharePayload = await viewModel.shareCurrentPhoto()
+            isPreparingShare = false
         }
     }
 

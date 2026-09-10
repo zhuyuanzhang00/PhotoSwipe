@@ -7,8 +7,10 @@ struct PhotoCardView: View {
     let dragOffset: CGSize
     let showsChrome: Bool
     let canUndo: Bool
+    let isSharing: Bool
     let onDelete: () -> Void
     let onUndo: () -> Void
+    let onShare: () -> Void
 
     @State private var locationText = "Location unavailable"
 
@@ -79,6 +81,23 @@ struct PhotoCardView: View {
                         .disabled(!canUndo)
                         .opacity(canUndo ? 1 : 0.4)
                         .accessibilityLabel("Undo last swipe")
+
+                        Button(action: onShare) {
+                            Group {
+                                if isSharing {
+                                    ProgressView()
+                                        .tint(.white)
+                                } else {
+                                    Image(systemName: "square.and.arrow.up")
+                                        .font(.title3.weight(.semibold))
+                                        .foregroundStyle(.white)
+                                }
+                            }
+                            .frame(width: 56, height: 56)
+                            .background(.white.opacity(0.22), in: Circle())
+                        }
+                        .disabled(isSharing)
+                        .accessibilityLabel("Share photo")
 
                         Button(action: onDelete) {
                             Image(systemName: "trash.fill")

@@ -62,4 +62,46 @@ final class PhotoImageLoader {
         manager.stopCachingImagesForAllAssets()
         cachedIdentifiers.removeAll()
     }
+
+    func exportForSharing(_ asset: PHAsset) async -> URL? {
+        await withCheckedContinuation { continuation in
+            let options = PHImageRequestOptions()
+            options.deliveryMode = .highQualityFormat
+            options.resizeMode = .none
+            options.isNetworkAccessAllowed = true
+            options.isSynchronous = false
+            options.version = .current
+
+            var resumed = false
+            manager.requestImageDataAndOrientation(for: asset, options: options) { data, uti, _, info in
+                let cancelled = (info?[PHImageCancelledKey] as? Bool) ?? false
+                guard !resumed else { return }
+                resumed = true
+
+                guard !cancelled, let data else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+
+                let ext = Self.fileExtension(for: uti)
+                let url = FileManager.default.temporaryDirectory
+                    .appendingPathComponent("PhotoSwipe-\(UUID().uuidString).\(ext)")
+                do {
+                    try data.write(to: url, options: .atomic)
+                    continuation.resume(returning: url)
+                } catch {
+                    continuation.resume(returning: nil)
+                }
+            }
+        }
+    }
+
+    private static func fileExtension(for uti: String?) -> String {
+        switch uti {
+        case "public.png", "public.heic":
+            return uti == "public.png" ? "png" : "heic"
+        default:
+            return "jpg"
+        }
+    }
 }

@@ -177,4 +177,9 @@ enum PhotoDateFormat {
     static func monthDayTitle(from date: Date) -> String {
         monthDay.string(from: date)
     }
+
+    static func monthDayKey(from date: Date) -> String {
+        let parts = Calendar.current.dateComponents([.month, .day], from: date)
+        return String(format: "%02d-%02d", parts.month ?? 1, parts.day ?? 1)
+    }
 }

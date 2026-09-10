@@ -66,14 +66,21 @@ struct DayPickerSheet: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                DatePicker(
-                    "Day",
-                    selection: $draftDate,
-                    displayedComponents: .date
+                DecoratedCalendarView(
+                    selectedDate: $draftDate,
+                    completedMonthDays: viewModel.completedMonthDays
                 )
-                .datePickerStyle(.graphical)
-                .tint(.white)
+                .frame(minHeight: 360)
                 .padding(.horizontal, 8)
+
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(.red)
+                        .frame(width: 10, height: 10)
+                    Text("Completed days")
+                        .font(.footnote)
+                        .foregroundStyle(.white.opacity(0.7))
+                }
 
                 Text("PhotoSwipe matches month and day across every year in your library.")
                     .font(.footnote)
