@@ -31,11 +31,12 @@ final class CurationViewModel {
     var selections: [String: PhotoItem] = [:]
     var toastMessage: String?
     var isDeleting = false
-    var hasUnlockedDayPicker = false
     var didCompleteReview = false
     var deleteError: String?
+    var completedMonthDays: Set<String> = []
 
     let imageLoader = PhotoImageLoader()
+    private let completedDaysBackend = CompletedDaysBackend.shared
     private var cacheTargetSize = CGSize(width: 1200, height: 2600)
     private var history: [SwipeRecord] = []
 
@@ -72,6 +73,7 @@ final class CurationViewModel {
     }
 
     func start() async {
+        completedMonthDays = completedDaysBackend.completedMonthDays
         let status = PhotoLibraryService.authorizationStatus()
         if status == .notDetermined {
             let updated = await PhotoLibraryService.requestAuthorization()
@@ -114,7 +116,6 @@ final class CurationViewModel {
         queue = photos
 
         if photos.isEmpty {
-            hasUnlockedDayPicker = true
             phase = .finished
         } else {
             phase = .browsing
@@ -160,6 +161,7 @@ final class CurationViewModel {
 
         deleteError = nil
         didCompleteReview = false
+        unmarkSelectedDayCompleted()
         phase = .browsing
         updateImageCache()
     }
@@ -191,7 +193,7 @@ final class CurationViewModel {
             selections.removeAll()
             queue = []
             imageLoader.stopCaching()
-            hasUnlockedDayPicker = true
+            markSelectedDayCompleted()
             didCompleteReview = true
             phase = .finished
         } catch {
@@ -204,6 +206,12 @@ final class CurationViewModel {
         Task { await loadFeed() }
     }
 
+    func shareCurrentPhoto() async -> SharePayload? {
+        guard let photo = currentPhoto else { return nil }
+        guard let url = await imageLoader.exportForSharing(photo.asset) else { return nil }
+        return SharePayload(items: [url])
+    }
+
     func updateCacheTarget(size: CGSize, scale: CGFloat) {
         let pixelSize = CGSize(width: size.width * scale, height: size.height * scale)
         guard pixelSize != cacheTargetSize else { return }
@@ -212,13 +220,23 @@ final class CurationViewModel {
     }
 
     private func finishQueue() {
-        hasUnlockedDayPicker = true
         didCompleteReview = true
         if selections.isEmpty {
+            markSelectedDayCompleted()
             phase = .finished
         } else {
             phase = .confirming
         }
+    }
+
+    private func markSelectedDayCompleted() {
+        completedDaysBackend.markCompleted(selectedDate)
+        completedMonthDays = completedDaysBackend.completedMonthDays
+    }
+
+    private func unmarkSelectedDayCompleted() {
+        completedDaysBackend.unmark(selectedDate)
+        completedMonthDays = completedDaysBackend.completedMonthDays
     }
 
     private func updateImageCache() {
