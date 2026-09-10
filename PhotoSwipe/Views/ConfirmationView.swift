@@ -73,6 +73,14 @@ struct ConfirmationView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Undo") {
+                        viewModel.undoLast()
+                    }
+                    .disabled(!viewModel.canUndo || viewModel.isDeleting)
+                }
+            }
         }
     }
 

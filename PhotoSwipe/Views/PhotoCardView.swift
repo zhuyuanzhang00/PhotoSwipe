@@ -6,7 +6,9 @@ struct PhotoCardView: View {
     let loader: PhotoImageLoader
     let dragOffset: CGSize
     let showsChrome: Bool
+    let canUndo: Bool
     let onDelete: () -> Void
+    let onUndo: () -> Void
 
     @State private var locationText = "Location unavailable"
 
@@ -66,8 +68,18 @@ struct PhotoCardView: View {
 
                     Spacer()
 
-                    HStack {
-                        Spacer()
+                    HStack(spacing: 28) {
+                        Button(action: onUndo) {
+                            Image(systemName: "arrow.uturn.backward")
+                                .font(.title3.weight(.semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 56, height: 56)
+                                .background(.white.opacity(canUndo ? 0.22 : 0.1), in: Circle())
+                        }
+                        .disabled(!canUndo)
+                        .opacity(canUndo ? 1 : 0.4)
+                        .accessibilityLabel("Undo last swipe")
+
                         Button(action: onDelete) {
                             Image(systemName: "trash.fill")
                                 .font(.title3.weight(.semibold))
@@ -77,13 +89,27 @@ struct PhotoCardView: View {
                                 .shadow(color: .black.opacity(0.4), radius: 10, y: 4)
                         }
                         .accessibilityLabel("Mark photo for deletion")
-                        Spacer()
                     }
+                    .frame(maxWidth: .infinity)
                     .padding(.bottom, 8)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
                 .padding(.bottom, 24)
+            }
+
+            if showsChrome {
+                Color.clear
+                    .frame(maxWidth: 240, maxHeight: 200)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        if canUndo {
+                            onUndo()
+                        }
+                    }
+                    .accessibilityLabel("Undo last swipe")
+                    .accessibilityAddTraits(.isButton)
+                    .accessibilityHidden(!canUndo)
             }
 
             stamp(text: "DELETE", color: .red, opacity: deleteOpacity, rotation: -18)

@@ -37,6 +37,7 @@ final class CurationViewModel {
 
     let imageLoader = PhotoImageLoader()
     private var cacheTargetSize = CGSize(width: 1200, height: 2600)
+    private var history: [SwipeRecord] = []
 
     var currentPhoto: PhotoItem? { queue.first }
     var nextPhoto: PhotoItem? {
@@ -46,6 +47,10 @@ final class CurationViewModel {
 
     var canSwipe: Bool {
         phase == .browsing && currentPhoto != nil
+    }
+
+    var canUndo: Bool {
+        !history.isEmpty && !isDeleting && phase != .loading
     }
 
     var progressText: String {
@@ -90,6 +95,7 @@ final class CurationViewModel {
         queue = []
         originalQueue = []
         selections = [:]
+        history = []
         didCompleteReview = false
         deleteError = nil
         imageLoader.stopCaching()
@@ -99,10 +105,10 @@ final class CurationViewModel {
         let month = parts.month ?? 1
         let day = parts.day ?? 1
 
-        let identifiers = await Task.detached(priority: .userInitiated) {
-            PhotoLibraryService.fetchPhotoIdentifiers(month: month, day: day)
+        let snapshots = await Task.detached(priority: .userInitiated) {
+            PhotoLibraryService.fetchOnThisDay(month: month, day: day)
         }.value
-        let photos = PhotoLibraryService.photos(for: identifiers)
+        let photos = PhotoLibraryService.photos(from: snapshots)
 
         originalQueue = photos
         queue = photos
@@ -123,6 +129,7 @@ final class CurationViewModel {
             selections[photo.id] = photo
         }
 
+        history.append(SwipeRecord(item: photo, action: action))
         queue.removeFirst()
         updateImageCache()
 
@@ -133,9 +140,27 @@ final class CurationViewModel {
 
     func cancelConfirmation() {
         selections.removeAll()
+        history.removeAll()
         queue = originalQueue
         deleteError = nil
         phase = originalQueue.isEmpty ? .finished : .browsing
+        updateImageCache()
+    }
+
+    func undoLast() {
+        guard canUndo, let record = history.popLast() else { return }
+
+        if record.action == .delete {
+            selections.removeValue(forKey: record.item.id)
+        }
+
+        if queue.first?.id != record.item.id {
+            queue.insert(record.item, at: 0)
+        }
+
+        deleteError = nil
+        didCompleteReview = false
+        phase = .browsing
         updateImageCache()
     }
 
