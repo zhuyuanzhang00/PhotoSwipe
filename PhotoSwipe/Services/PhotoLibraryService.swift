@@ -21,40 +21,67 @@ enum PhotoLibraryService {
         status == .authorized || status == .limited
     }
 
-    /// Local identifiers for images whose creation date matches month-day, oldest first.
-    nonisolated static func fetchPhotoIdentifiers(month: Int, day: Int) -> [String] {
+    nonisolated static func makeFetchOptions() -> PHFetchOptions {
         let options = PHFetchOptions()
         options.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue)
         options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
         options.includeHiddenAssets = false
+        options.includeAssetSourceTypes = [.typeUserLibrary]
+        options.wantsIncrementalChangeDetails = false
+        prefetchOriginalMetadata(on: options)
+        return options
+    }
 
+    /// Prefetch original metadata (location, dates) so PHAsset does not fetch it on demand on the main queue.
+    nonisolated static func prefetchOriginalMetadata(on options: PHFetchOptions) {
+        if let propertySet = NSClassFromString("PHAssetOriginalMetadataProperties"),
+           options.responds(to: NSSelectorFromString("setFetchPropertySets:")) {
+            options.setValue([propertySet], forKey: "fetchPropertySets")
+        }
+
+        if options.responds(to: NSSelectorFromString("setPrefetchAssetExtendedMetadata:")) {
+            options.setValue(true, forKey: "prefetchAssetExtendedMetadata")
+        }
+    }
+
+    /// Photos whose creation date matches month-day, oldest first, with metadata snapshotted during fetch.
+    nonisolated static func fetchOnThisDay(month: Int, day: Int) -> [PhotoSnapshot] {
+        let options = makeFetchOptions()
         let result = PHAsset.fetchAssets(with: .image, options: options)
-        var matches: [String] = []
+        var matches: [PhotoSnapshot] = []
         let calendar = Calendar.current
 
         result.enumerateObjects { asset, _, _ in
             guard let date = asset.creationDate else { return }
             let parts = calendar.dateComponents([.month, .day], from: date)
             if parts.month == month, parts.day == day {
-                matches.append(asset.localIdentifier)
+                matches.append(PhotoSnapshot(asset: asset, creationDate: date))
             }
         }
 
         return matches
     }
 
-    static func photos(for identifiers: [String]) -> [PhotoItem] {
-        guard !identifiers.isEmpty else { return [] }
+    static func photos(from snapshots: [PhotoSnapshot]) -> [PhotoItem] {
+        guard !snapshots.isEmpty else { return [] }
 
-        let result = PHAsset.fetchAssets(withLocalIdentifiers: identifiers, options: nil)
+        let identifiers = snapshots.map(\.id)
+        let options = makeFetchOptions()
+        options.predicate = nil
+        let result = PHAsset.fetchAssets(withLocalIdentifiers: identifiers, options: options)
         var assetsByID: [String: PHAsset] = [:]
         result.enumerateObjects { asset, _, _ in
             assetsByID[asset.localIdentifier] = asset
         }
 
-        return identifiers.compactMap { identifier in
-            guard let asset = assetsByID[identifier] else { return nil }
-            return PhotoItem(asset: asset)
+        return snapshots.compactMap { snapshot in
+            guard let asset = assetsByID[snapshot.id] else { return nil }
+            return PhotoItem(
+                id: snapshot.id,
+                asset: asset,
+                creationDate: snapshot.creationDate,
+                location: snapshot.location
+            )
         }
     }
 

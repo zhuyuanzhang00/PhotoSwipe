@@ -34,6 +34,16 @@ struct EndOfQueueView: View {
             .padding(.horizontal, 40)
             .padding(.top, 8)
 
+            if viewModel.canUndo {
+                Button {
+                    viewModel.undoLast()
+                } label: {
+                    Label("Undo last photo", systemImage: "arrow.uturn.backward")
+                        .font(.headline)
+                }
+                .foregroundStyle(.white)
+            }
+
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

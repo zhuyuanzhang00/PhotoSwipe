@@ -23,7 +23,9 @@ struct SwipeDeckView: View {
                         loader: viewModel.imageLoader,
                         dragOffset: .zero,
                         showsChrome: false,
-                        onDelete: {}
+                        canUndo: false,
+                        onDelete: {},
+                        onUndo: {}
                     )
                     .id(next.id)
                     .scaleEffect(0.96)
@@ -39,11 +41,13 @@ struct SwipeDeckView: View {
                         loader: viewModel.imageLoader,
                         dragOffset: dragOffset,
                         showsChrome: true,
-                        onDelete: { fling(.delete, width: proxy.size.width) }
+                        canUndo: viewModel.canUndo,
+                        onDelete: { fling(.delete, width: proxy.size.width) },
+                        onUndo: { undoLast() }
                     )
                     .id(current.id)
                     .padding(cardPadding)
-                    .gesture(dragGesture(width: proxy.size.width))
+                    .gesture(dragGesture(size: proxy.size))
                 }
             }
             .safeAreaInset(edge: .top) {
@@ -75,6 +79,18 @@ struct SwipeDeckView: View {
 
             Spacer()
 
+            if viewModel.canUndo {
+                Button(action: { undoLast() }) {
+                    Image(systemName: "arrow.uturn.backward")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .background(.white.opacity(0.12), in: Circle())
+                }
+                .accessibilityLabel("Undo last swipe")
+                .padding(.trailing, 8)
+            }
+
             if viewModel.hasUnlockedDayPicker {
                 Button(action: onPickDay) {
                     Label("Pick a day", systemImage: "calendar")
@@ -92,10 +108,11 @@ struct SwipeDeckView: View {
         .padding(.bottom, 4)
     }
 
-    private func dragGesture(width: CGFloat) -> some Gesture {
+    private func dragGesture(size: CGSize) -> some Gesture {
         DragGesture()
             .onChanged { value in
                 guard viewModel.canSwipe, !isFlinging else { return }
+                if hypot(value.translation.width, value.translation.height) < 12 { return }
                 dragOffset = value.translation
             }
             .onEnded { value in
@@ -106,17 +123,43 @@ struct SwipeDeckView: View {
                     return
                 }
 
+                let distance = hypot(value.translation.width, value.translation.height)
+                if distance < 16 {
+                    if isCenterTap(start: value.startLocation, in: size) {
+                        undoLast()
+                    }
+                    withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                        dragOffset = .zero
+                    }
+                    return
+                }
+
                 let dx = value.predictedEndTranslation.width
                 if dx < -swipeThreshold {
-                    fling(.delete, width: width)
+                    fling(.delete, width: size.width)
                 } else if dx > swipeThreshold {
-                    fling(.keep, width: width)
+                    fling(.keep, width: size.width)
                 } else {
                     withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
                         dragOffset = .zero
                     }
                 }
             }
+    }
+
+    private func isCenterTap(start: CGPoint, in size: CGSize) -> Bool {
+        let dx = abs(start.x - size.width / 2)
+        let dy = abs(start.y - size.height / 2)
+        return dx < size.width * 0.28 && dy < size.height * 0.22
+    }
+
+    private func undoLast() {
+        guard viewModel.canUndo, !isFlinging else { return }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        withAnimation(.spring(response: 0.32, dampingFraction: 0.86)) {
+            dragOffset = .zero
+            viewModel.undoLast()
+        }
     }
 
     private func fling(_ action: SwipeAction, width: CGFloat) {

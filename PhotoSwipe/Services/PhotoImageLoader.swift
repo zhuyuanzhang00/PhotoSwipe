@@ -9,18 +9,20 @@ final class PhotoImageLoader {
     func request(
         _ asset: PHAsset,
         targetSize: CGSize,
+        contentMode: PHImageContentMode = .aspectFit,
         resultHandler: @escaping (UIImage?) -> Void
     ) -> PHImageRequestID {
         let options = PHImageRequestOptions()
         options.deliveryMode = .opportunistic
-        options.resizeMode = .fast
+        options.resizeMode = targetSize == PHImageManagerMaximumSize ? .none : .exact
         options.isNetworkAccessAllowed = true
         options.isSynchronous = false
+        options.version = .current
 
         return manager.requestImage(
             for: asset,
             targetSize: targetSize,
-            contentMode: .aspectFill,
+            contentMode: contentMode,
             options: options
         ) { image, _ in
             Task { @MainActor in
@@ -44,13 +46,14 @@ final class PhotoImageLoader {
 
         let options = PHImageRequestOptions()
         options.deliveryMode = .opportunistic
-        options.resizeMode = .fast
+        options.resizeMode = .none
         options.isNetworkAccessAllowed = true
+        options.version = .current
 
         manager.startCachingImages(
             for: assets,
-            targetSize: targetSize,
-            contentMode: .aspectFill,
+            targetSize: PHImageManagerMaximumSize,
+            contentMode: .aspectFit,
             options: options
         )
     }

@@ -6,7 +6,6 @@ struct PhotoImageView: View {
     let asset: PHAsset
     let loader: PhotoImageLoader
 
-    @Environment(\.displayScale) private var displayScale
     @State private var image: UIImage?
     @State private var requestID: PHImageRequestID?
 
@@ -17,19 +16,18 @@ struct PhotoImageView: View {
                 if let image {
                     Image(uiImage: image)
                         .resizable()
-                        .scaledToFill()
+                        .scaledToFit()
                         .frame(width: proxy.size.width, height: proxy.size.height)
-                        .clipped()
                 } else {
                     ProgressView()
                         .tint(.white)
                 }
             }
             .onAppear {
-                start(size: proxy.size)
+                start()
             }
             .onChange(of: asset.localIdentifier) {
-                start(size: proxy.size)
+                start()
             }
             .onDisappear {
                 cancel()
@@ -37,11 +35,14 @@ struct PhotoImageView: View {
         }
     }
 
-    private func start(size: CGSize) {
+    private func start() {
         cancel()
         image = nil
-        let target = CGSize(width: size.width * displayScale, height: size.height * displayScale)
-        requestID = loader.request(asset, targetSize: target) { loaded in
+        requestID = loader.request(
+            asset,
+            targetSize: PHImageManagerMaximumSize,
+            contentMode: .aspectFit
+        ) { loaded in
             if let loaded {
                 image = loaded
             }
@@ -76,7 +77,11 @@ struct PhotoThumbnailView: View {
             .clipped()
             .onAppear {
                 let side = 240 * displayScale
-                requestID = loader.request(asset, targetSize: CGSize(width: side, height: side)) { loaded in
+                requestID = loader.request(
+                    asset,
+                    targetSize: CGSize(width: side, height: side),
+                    contentMode: .aspectFill
+                ) { loaded in
                     if let loaded {
                         image = loaded
                     }
