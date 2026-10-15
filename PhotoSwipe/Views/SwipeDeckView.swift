@@ -92,18 +92,6 @@ struct SwipeDeckView: View {
             .buttonStyle(.plain)
             .accessibilityLabel("Pick a day, currently \(viewModel.selectedDayTitle)")
 
-            if viewModel.canUndo {
-                Button(action: { undoLast() }) {
-                    Image(systemName: "arrow.uturn.backward")
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .background(.white.opacity(0.12), in: Circle())
-                }
-                .accessibilityLabel("Undo last swipe")
-                .padding(.trailing, 8)
-            }
-
             Button(action: onPickDay) {
                 Label("Pick a day", systemImage: "calendar")
                     .labelStyle(.iconOnly)
@@ -136,7 +124,24 @@ struct SwipeDeckView: View {
 
                 let distance = hypot(value.translation.width, value.translation.height)
                 if distance < 16 {
-                    if isCenterTap(start: value.startLocation, in: size) {
+                    let inCenter = isCenterTap(start: value.startLocation, in: size)
+                    // #region agent log
+                    AgentDebugLog.write(
+                        hypothesisId: "D",
+                        location: "SwipeDeckView.swift:dragGesture",
+                        message: "short tap evaluated",
+                        data: [
+                            "inCenter": inCenter,
+                            "canUndo": viewModel.canUndo,
+                            "startX": value.startLocation.x,
+                            "startY": value.startLocation.y,
+                            "width": size.width,
+                            "height": size.height,
+                            "radiusThreshold": 0.5 * min(size.width, size.height)
+                        ]
+                    )
+                    // #endregion
+                    if inCenter {
                         undoLast()
                     }
                     withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
@@ -158,10 +163,12 @@ struct SwipeDeckView: View {
             }
     }
 
+    /// Circle centered on the deck whose radius is 50% of the smaller screen dimension.
     private func isCenterTap(start: CGPoint, in size: CGSize) -> Bool {
-        let dx = abs(start.x - size.width / 2)
-        let dy = abs(start.y - size.height / 2)
-        return dx < size.width * 0.28 && dy < size.height * 0.22
+        let dx = start.x - size.width / 2
+        let dy = start.y - size.height / 2
+        let radius = 0.5 * min(size.width, size.height)
+        return hypot(dx, dy) <= radius
     }
 
     private func undoLast() {

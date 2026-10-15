@@ -117,20 +117,6 @@ struct PhotoCardView: View {
                 .padding(.bottom, 24)
             }
 
-            if showsChrome {
-                Color.clear
-                    .frame(maxWidth: 240, maxHeight: 200)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        if canUndo {
-                            onUndo()
-                        }
-                    }
-                    .accessibilityLabel("Undo last swipe")
-                    .accessibilityAddTraits(.isButton)
-                    .accessibilityHidden(!canUndo)
-            }
-
             stamp(text: "DELETE", color: .red, opacity: deleteOpacity, rotation: -18)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding(28)

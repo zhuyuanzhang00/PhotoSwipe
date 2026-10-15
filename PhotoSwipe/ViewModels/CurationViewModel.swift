@@ -151,6 +151,21 @@ final class CurationViewModel {
     func undoLast() {
         guard canUndo, let record = history.popLast() else { return }
 
+        // #region agent log
+        AgentDebugLog.write(
+            hypothesisId: "B",
+            location: "CurationViewModel.swift:undoLast",
+            message: "undoLast invoked",
+            data: [
+                "phase": String(describing: phase),
+                "historyAfterPop": history.count,
+                "action": record.action == .delete ? "delete" : "keep",
+                "itemId": record.item.id,
+                "didCompleteReview": didCompleteReview
+            ]
+        )
+        // #endregion
+
         if record.action == .delete {
             selections.removeValue(forKey: record.item.id)
         }
@@ -196,6 +211,21 @@ final class CurationViewModel {
             markSelectedDayCompleted()
             didCompleteReview = true
             phase = .finished
+
+            // #region agent log
+            AgentDebugLog.write(
+                hypothesisId: "A",
+                location: "CurationViewModel.swift:confirmDeletion",
+                message: "post-trash state",
+                data: [
+                    "historyCount": history.count,
+                    "canUndo": canUndo,
+                    "phase": String(describing: phase),
+                    "queueCount": queue.count,
+                    "selectionsCount": selections.count
+                ]
+            )
+            // #endregion
         } catch {
             deleteError = "Couldn't move photos to Trash. Try again."
         }
@@ -254,3 +284,41 @@ final class CurationViewModel {
         }
     }
 }
+
+// #region agent log
+enum AgentDebugLog {
+    private static let logPath = "/Users/jonathanzhang/Desktop/PhotoSwipe/.cursor/debug-b39af9.log"
+    private static let endpoint = URL(string: "http://127.0.0.1:7705/ingest/6e52a423-5dd7-4c35-939a-3a0bd2fad4b3")!
+
+    static func write(hypothesisId: String, location: String, message: String, data: [String: Any] = [:]) {
+        var payload: [String: Any] = [
+            "sessionId": "b39af9",
+            "hypothesisId": hypothesisId,
+            "location": location,
+            "message": message,
+            "data": data,
+            "timestamp": Date().timeIntervalSince1970 * 1000
+        ]
+        guard let json = try? JSONSerialization.data(withJSONObject: payload),
+              var line = String(data: json, encoding: .utf8) else { return }
+        line.append("\n")
+
+        let url = URL(fileURLWithPath: logPath)
+        if !FileManager.default.fileExists(atPath: logPath) {
+            FileManager.default.createFile(atPath: logPath, contents: nil)
+        }
+        if let handle = try? FileHandle(forWritingTo: url) {
+            defer { try? handle.close() }
+            _ = try? handle.seekToEnd()
+            try? handle.write(contentsOf: Data(line.utf8))
+        }
+
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("b39af9", forHTTPHeaderField: "X-Debug-Session-Id")
+        request.httpBody = json
+        URLSession.shared.dataTask(with: request).resume()
+    }
+}
+// #endregion
