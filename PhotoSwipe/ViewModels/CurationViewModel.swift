@@ -50,8 +50,9 @@ final class CurationViewModel {
         phase == .browsing && currentPhoto != nil
     }
 
+    /// Undo is only meaningful while reviewing or confirming — not after a completed trash operation.
     var canUndo: Bool {
-        !history.isEmpty && !isDeleting && phase != .loading
+        !history.isEmpty && !isDeleting && (phase == .browsing || phase == .confirming || phase == .finished)
     }
 
     var progressText: String {
@@ -77,29 +78,15 @@ final class CurationViewModel {
         let status = PhotoLibraryService.authorizationStatus()
         if status == .notDetermined {
             let updated = await PhotoLibraryService.requestAuthorization()
-            handleAuthorization(updated)
+            applyAuthorization(updated)
         } else {
-            handleAuthorization(status)
-        }
-    }
-
-    func handleAuthorization(_ status: PHAuthorizationStatus) {
-        if PhotoLibraryService.isAuthorized(status) {
-            permission = .authorized
-            Task { await loadFeed() }
-        } else {
-            permission = .denied
+            applyAuthorization(status)
         }
     }
 
     func loadFeed() async {
         phase = .loading
-        queue = []
-        originalQueue = []
-        selections = [:]
-        history = []
-        didCompleteReview = false
-        deleteError = nil
+        resetSessionState()
         imageLoader.stopCaching()
         await Task.yield()
 
@@ -107,15 +94,15 @@ final class CurationViewModel {
         let month = parts.month ?? 1
         let day = parts.day ?? 1
 
-        let snapshots = await Task.detached(priority: .userInitiated) {
+        let photos = await Task.detached(priority: .userInitiated) {
             PhotoLibraryService.fetchOnThisDay(month: month, day: day)
         }.value
-        let photos = PhotoLibraryService.photos(from: snapshots)
 
         originalQueue = photos
         queue = photos
 
         if photos.isEmpty {
+            didCompleteReview = false
             phase = .finished
         } else {
             phase = .browsing
@@ -144,27 +131,13 @@ final class CurationViewModel {
         history.removeAll()
         queue = originalQueue
         deleteError = nil
+        didCompleteReview = false
         phase = originalQueue.isEmpty ? .finished : .browsing
         updateImageCache()
     }
 
     func undoLast() {
         guard canUndo, let record = history.popLast() else { return }
-
-        // #region agent log
-        AgentDebugLog.write(
-            hypothesisId: "B",
-            location: "CurationViewModel.swift:undoLast",
-            message: "undoLast invoked",
-            data: [
-                "phase": String(describing: phase),
-                "historyAfterPop": history.count,
-                "action": record.action == .delete ? "delete" : "keep",
-                "itemId": record.item.id,
-                "didCompleteReview": didCompleteReview
-            ]
-        )
-        // #endregion
 
         if record.action == .delete {
             selections.removeValue(forKey: record.item.id)
@@ -184,6 +157,7 @@ final class CurationViewModel {
     func confirmDeletion() async {
         let doomed = photosToDelete
         guard !doomed.isEmpty else {
+            history.removeAll()
             phase = .finished
             return
         }
@@ -197,37 +171,22 @@ final class CurationViewModel {
         do {
             try await PhotoLibraryService.moveToTrash(doomed)
             let count = doomed.count
-            let photoWord = count == 1 ? "photo" : "photos"
             if bytes > 0 {
                 let freed = PhotoLibraryService.formattedByteCount(bytes)
-                showToast("\(count) \(photoWord) deleted • \(freed) freed")
+                showToast("\(Self.photoCount(count)) deleted • \(freed) freed")
             } else {
-                showToast("\(count) \(photoWord) deleted")
+                showToast("\(Self.photoCount(count)) deleted")
             }
 
             selections.removeAll()
+            history.removeAll()
             queue = []
             imageLoader.stopCaching()
             markSelectedDayCompleted()
             didCompleteReview = true
             phase = .finished
-
-            // #region agent log
-            AgentDebugLog.write(
-                hypothesisId: "A",
-                location: "CurationViewModel.swift:confirmDeletion",
-                message: "post-trash state",
-                data: [
-                    "historyCount": history.count,
-                    "canUndo": canUndo,
-                    "phase": String(describing: phase),
-                    "queueCount": queue.count,
-                    "selectionsCount": selections.count
-                ]
-            )
-            // #endregion
         } catch {
-            deleteError = "Couldn't move photos to Trash. Try again."
+            deleteError = "Couldn't move these photos to Recently Deleted. Check Photos access and try again."
         }
     }
 
@@ -238,7 +197,10 @@ final class CurationViewModel {
 
     func shareCurrentPhoto() async -> SharePayload? {
         guard let photo = currentPhoto else { return nil }
-        guard let url = await imageLoader.exportForSharing(photo.asset) else { return nil }
+        guard let url = await imageLoader.exportForSharing(photo.asset) else {
+            showToast("Couldn't prepare this photo for sharing.")
+            return nil
+        }
         return SharePayload(items: [url])
     }
 
@@ -247,6 +209,24 @@ final class CurationViewModel {
         guard pixelSize != cacheTargetSize else { return }
         cacheTargetSize = pixelSize
         updateImageCache()
+    }
+
+    private func applyAuthorization(_ status: PHAuthorizationStatus) {
+        if PhotoLibraryService.isAuthorized(status) {
+            permission = .authorized
+            Task { await loadFeed() }
+        } else {
+            permission = .denied
+        }
+    }
+
+    private func resetSessionState() {
+        queue = []
+        originalQueue = []
+        selections = [:]
+        history = []
+        didCompleteReview = false
+        deleteError = nil
     }
 
     private func finishQueue() {
@@ -283,42 +263,8 @@ final class CurationViewModel {
             }
         }
     }
-}
 
-// #region agent log
-enum AgentDebugLog {
-    private static let logPath = "/Users/jonathanzhang/Desktop/PhotoSwipe/.cursor/debug-b39af9.log"
-    private static let endpoint = URL(string: "http://127.0.0.1:7705/ingest/6e52a423-5dd7-4c35-939a-3a0bd2fad4b3")!
-
-    static func write(hypothesisId: String, location: String, message: String, data: [String: Any] = [:]) {
-        var payload: [String: Any] = [
-            "sessionId": "b39af9",
-            "hypothesisId": hypothesisId,
-            "location": location,
-            "message": message,
-            "data": data,
-            "timestamp": Date().timeIntervalSince1970 * 1000
-        ]
-        guard let json = try? JSONSerialization.data(withJSONObject: payload),
-              var line = String(data: json, encoding: .utf8) else { return }
-        line.append("\n")
-
-        let url = URL(fileURLWithPath: logPath)
-        if !FileManager.default.fileExists(atPath: logPath) {
-            FileManager.default.createFile(atPath: logPath, contents: nil)
-        }
-        if let handle = try? FileHandle(forWritingTo: url) {
-            defer { try? handle.close() }
-            _ = try? handle.seekToEnd()
-            try? handle.write(contentsOf: Data(line.utf8))
-        }
-
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("b39af9", forHTTPHeaderField: "X-Debug-Session-Id")
-        request.httpBody = json
-        URLSession.shared.dataTask(with: request).resume()
+    private static func photoCount(_ count: Int) -> String {
+        count == 1 ? "1 photo" : "\(count) photos"
     }
 }
-// #endregion

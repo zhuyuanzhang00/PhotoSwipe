@@ -19,23 +19,12 @@ struct SwipeDeckView: View {
                 Color.black.ignoresSafeArea()
 
                 if let next = viewModel.nextPhoto {
-                    PhotoCardView(
-                        item: next,
-                        progressText: viewModel.progressText,
-                        loader: viewModel.imageLoader,
-                        dragOffset: .zero,
-                        showsChrome: false,
-                        canUndo: false,
-                        isSharing: false,
-                        onDelete: {},
-                        onUndo: {},
-                        onShare: {}
-                    )
-                    .id(next.id)
-                    .scaleEffect(0.96)
-                    .opacity(0.55)
-                    .padding(cardPadding)
-                    .allowsHitTesting(false)
+                    PhotoImageView(asset: next.asset, loader: viewModel.imageLoader)
+                        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                        .scaleEffect(0.96)
+                        .opacity(0.55)
+                        .padding(cardPadding)
+                        .allowsHitTesting(false)
                 }
 
                 if let current = viewModel.currentPhoto {
@@ -44,7 +33,6 @@ struct SwipeDeckView: View {
                         progressText: viewModel.progressText,
                         loader: viewModel.imageLoader,
                         dragOffset: dragOffset,
-                        showsChrome: true,
                         canUndo: viewModel.canUndo,
                         isSharing: isPreparingShare,
                         onDelete: { fling(.delete, width: proxy.size.width) },
@@ -76,8 +64,8 @@ struct SwipeDeckView: View {
     }
 
     private var deckHeader: some View {
-        HStack {
-            Button(action: onPickDay) {
+        Button(action: onPickDay) {
+            HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("On This Day")
                         .font(.headline)
@@ -86,22 +74,19 @@ struct SwipeDeckView: View {
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.7))
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Pick a day, currently \(viewModel.selectedDayTitle)")
 
-            Button(action: onPickDay) {
-                Label("Pick a day", systemImage: "calendar")
-                    .labelStyle(.iconOnly)
+                Spacer(minLength: 12)
+
+                Image(systemName: "calendar")
                     .font(.title3)
                     .foregroundStyle(.white)
                     .frame(width: 44, height: 44)
                     .background(.white.opacity(0.12), in: Circle())
             }
-            .accessibilityLabel("Pick a day")
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Pick a day, currently \(viewModel.selectedDayTitle)")
         .padding(.horizontal, 20)
         .padding(.top, 6)
         .padding(.bottom, 4)
@@ -124,24 +109,7 @@ struct SwipeDeckView: View {
 
                 let distance = hypot(value.translation.width, value.translation.height)
                 if distance < 16 {
-                    let inCenter = isCenterTap(start: value.startLocation, in: size)
-                    // #region agent log
-                    AgentDebugLog.write(
-                        hypothesisId: "D",
-                        location: "SwipeDeckView.swift:dragGesture",
-                        message: "short tap evaluated",
-                        data: [
-                            "inCenter": inCenter,
-                            "canUndo": viewModel.canUndo,
-                            "startX": value.startLocation.x,
-                            "startY": value.startLocation.y,
-                            "width": size.width,
-                            "height": size.height,
-                            "radiusThreshold": 0.5 * min(size.width, size.height)
-                        ]
-                    )
-                    // #endregion
-                    if inCenter {
+                    if isCenterTap(start: value.startLocation, in: size) {
                         undoLast()
                     }
                     withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {

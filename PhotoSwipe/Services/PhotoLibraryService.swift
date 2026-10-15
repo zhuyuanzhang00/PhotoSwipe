@@ -2,7 +2,6 @@ import CoreLocation
 import Foundation
 import MapKit
 import Photos
-import UIKit
 
 enum PhotoLibraryService {
     static func authorizationStatus() -> PHAuthorizationStatus {
@@ -21,68 +20,29 @@ enum PhotoLibraryService {
         status == .authorized || status == .limited
     }
 
-    nonisolated static func makeFetchOptions() -> PHFetchOptions {
-        let options = PHFetchOptions()
-        options.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue)
-        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
-        options.includeHiddenAssets = false
-        options.includeAssetSourceTypes = [.typeUserLibrary]
-        options.wantsIncrementalChangeDetails = false
-        prefetchOriginalMetadata(on: options)
-        return options
-    }
-
-    /// Prefetch original metadata (location, dates) so PHAsset does not fetch it on demand on the main queue.
-    nonisolated static func prefetchOriginalMetadata(on options: PHFetchOptions) {
-        if let propertySet = NSClassFromString("PHAssetOriginalMetadataProperties"),
-           options.responds(to: NSSelectorFromString("setFetchPropertySets:")) {
-            options.setValue([propertySet], forKey: "fetchPropertySets")
-        }
-
-        if options.responds(to: NSSelectorFromString("setPrefetchAssetExtendedMetadata:")) {
-            options.setValue(true, forKey: "prefetchAssetExtendedMetadata")
-        }
-    }
-
-    /// Photos whose creation date matches month-day, oldest first, with metadata snapshotted during fetch.
-    nonisolated static func fetchOnThisDay(month: Int, day: Int) -> [PhotoSnapshot] {
+    /// Photos whose creation date matches month-day, oldest first.
+    /// Built in one pass so we do not re-fetch assets by identifier afterward.
+    nonisolated static func fetchOnThisDay(month: Int, day: Int) -> [PhotoItem] {
         let options = makeFetchOptions()
         let result = PHAsset.fetchAssets(with: .image, options: options)
-        var matches: [PhotoSnapshot] = []
+        var matches: [PhotoItem] = []
         let calendar = Calendar.current
 
         result.enumerateObjects { asset, _, _ in
             guard let date = asset.creationDate else { return }
             let parts = calendar.dateComponents([.month, .day], from: date)
-            if parts.month == month, parts.day == day {
-                matches.append(PhotoSnapshot(asset: asset, creationDate: date))
-            }
+            guard parts.month == month, parts.day == day else { return }
+            matches.append(
+                PhotoItem(
+                    id: asset.localIdentifier,
+                    asset: asset,
+                    creationDate: date,
+                    location: asset.location
+                )
+            )
         }
 
         return matches
-    }
-
-    static func photos(from snapshots: [PhotoSnapshot]) -> [PhotoItem] {
-        guard !snapshots.isEmpty else { return [] }
-
-        let identifiers = snapshots.map(\.id)
-        let options = makeFetchOptions()
-        options.predicate = nil
-        let result = PHAsset.fetchAssets(withLocalIdentifiers: identifiers, options: options)
-        var assetsByID: [String: PHAsset] = [:]
-        result.enumerateObjects { asset, _, _ in
-            assetsByID[asset.localIdentifier] = asset
-        }
-
-        return snapshots.compactMap { snapshot in
-            guard let asset = assetsByID[snapshot.id] else { return nil }
-            return PhotoItem(
-                id: snapshot.id,
-                asset: asset,
-                creationDate: snapshot.creationDate,
-                location: snapshot.location
-            )
-        }
     }
 
     static func fileSize(of asset: PHAsset) -> Int64 {
@@ -106,15 +66,38 @@ enum PhotoLibraryService {
             PHAssetChangeRequest.deleteAssets(assets)
         }
     }
+
+    nonisolated private static func makeFetchOptions() -> PHFetchOptions {
+        let options = PHFetchOptions()
+        options.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue)
+        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+        options.includeHiddenAssets = false
+        options.includeAssetSourceTypes = [.typeUserLibrary]
+        options.wantsIncrementalChangeDetails = false
+        prefetchOriginalMetadata(on: options)
+        return options
+    }
+
+    /// Prefetch original metadata so later UI access does not demand-load on the main queue.
+    nonisolated private static func prefetchOriginalMetadata(on options: PHFetchOptions) {
+        if let propertySet = NSClassFromString("PHAssetOriginalMetadataProperties"),
+           options.responds(to: NSSelectorFromString("setFetchPropertySets:")) {
+            options.setValue([propertySet], forKey: "fetchPropertySets")
+        }
+
+        if options.responds(to: NSSelectorFromString("setPrefetchAssetExtendedMetadata:")) {
+            options.setValue(true, forKey: "prefetchAssetExtendedMetadata")
+        }
+    }
 }
 
-final class LocationNamer {
+actor LocationNamer {
     static let shared = LocationNamer()
 
     private var cache: [String: String] = [:]
 
     func name(for location: CLLocation?) async -> String {
-        guard let location else { return "Location unavailable" }
+        guard let location else { return "No location" }
 
         let key = String(format: "%.5f,%.5f", location.coordinate.latitude, location.coordinate.longitude)
         if let cached = cache[key] {
@@ -122,16 +105,18 @@ final class LocationNamer {
         }
 
         guard let request = MKReverseGeocodingRequest(location: location) else {
-            return "Location unavailable"
+            return "Couldn't resolve location"
         }
 
         do {
             let mapItems = try await request.mapItems
-            let formatted = Self.format(mapItems.first) ?? "Location unavailable"
+            guard let formatted = Self.format(mapItems.first) else {
+                return "Couldn't resolve location"
+            }
             cache[key] = formatted
             return formatted
         } catch {
-            return "Location unavailable"
+            return "Couldn't resolve location"
         }
     }
 
@@ -143,7 +128,7 @@ final class LocationNamer {
            !region.isEmpty {
             return "\(city), \(region)"
         }
-        if let city = mapItem.addressRepresentations?.cityName {
+        if let city = mapItem.addressRepresentations?.cityName, !city.isEmpty {
             return city
         }
         if let short = mapItem.address?.shortAddress, !short.isEmpty {
@@ -152,25 +137,30 @@ final class LocationNamer {
         if let name = mapItem.name, !name.isEmpty {
             return name
         }
-        return mapItem.address?.fullAddress
+        if let full = mapItem.address?.fullAddress, !full.isEmpty {
+            return full
+        }
+        return nil
     }
 }
 
 enum PhotoDateFormat {
     static let timestamp: DateFormatter = {
         let formatter = DateFormatter()
+        formatter.locale = .current
         formatter.dateFormat = "MMMM d, yyyy • h:mm a"
         return formatter
     }()
 
     static let monthDay: DateFormatter = {
         let formatter = DateFormatter()
+        formatter.locale = .current
         formatter.dateFormat = "MMMM d"
         return formatter
     }()
 
     static func timestamp(from date: Date?) -> String {
-        guard let date else { return "Date unavailable" }
+        guard let date else { return "Unknown date" }
         return timestamp.string(from: date)
     }
 

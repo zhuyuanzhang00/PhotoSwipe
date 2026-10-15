@@ -13,7 +13,7 @@ struct PermissionDeniedView: View {
                 .font(.title2.weight(.semibold))
                 .foregroundStyle(.white)
 
-            Text("PhotoSwipe needs access to your library to show On This Day memories and move photos you delete to Trash. Enable access in Settings to continue.")
+            Text("PhotoSwipe needs Photos access to load On This Day memories and move deleted photos to Recently Deleted. Turn on access in Settings to continue.")
                 .font(.body)
                 .foregroundStyle(.white.opacity(0.7))
                 .multilineTextAlignment(.center)

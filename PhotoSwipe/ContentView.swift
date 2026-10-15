@@ -15,8 +15,6 @@ struct ContentView: View {
                 authorizedContent
             }
         }
-        .preferredColorScheme(.dark)
-        .statusBarHidden(false)
         .task {
             await viewModel.start()
         }

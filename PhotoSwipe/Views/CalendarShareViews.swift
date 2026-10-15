@@ -15,14 +15,15 @@ struct ShareSheet: UIViewControllerRepresentable {
         controller.completionWithItemsHandler = { _, _, _, _ in
             dismiss()
         }
-        if let popover = controller.popoverPresentationController {
-            popover.sourceView = UIView()
-            popover.permittedArrowDirections = []
-        }
         return controller
     }
 
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {
+        guard let popover = controller.popoverPresentationController, let view = controller.view else { return }
+        popover.sourceView = view
+        popover.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 0, height: 0)
+        popover.permittedArrowDirections = []
+    }
 }
 
 struct DecoratedCalendarView: UIViewRepresentable {
@@ -35,7 +36,7 @@ struct DecoratedCalendarView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> UICalendarView {
         let calendarView = UICalendarView()
-        calendarView.calendar = Calendar.current
+        calendarView.calendar = .current
         calendarView.locale = .current
         calendarView.fontDesign = .rounded
         calendarView.delegate = context.coordinator
@@ -58,10 +59,13 @@ struct DecoratedCalendarView: UIViewRepresentable {
         context.coordinator.completedMonthDays = completedMonthDays
 
         let visible = calendarView.visibleDateComponents
-        let year = visible.year ?? Calendar.current.component(.year, from: selectedDate)
-        let month = visible.month ?? Calendar.current.component(.month, from: selectedDate)
-        let components = (1...31).map {
-            DateComponents(calendar: Calendar.current, year: year, month: month, day: $0)
+        let calendar = Calendar.current
+        let year = visible.year ?? calendar.component(.year, from: selectedDate)
+        let month = visible.month ?? calendar.component(.month, from: selectedDate)
+        let monthDate = calendar.date(from: DateComponents(year: year, month: month, day: 1)) ?? selectedDate
+        let dayRange = calendar.range(of: .day, in: .month, for: monthDate) ?? 1..<32
+        let components = dayRange.map {
+            DateComponents(calendar: calendar, year: year, month: month, day: $0)
         }
         calendarView.reloadDecorations(forDateComponents: components, animated: false)
     }

@@ -38,7 +38,7 @@ struct EndOfQueueView: View {
                 Button {
                     viewModel.undoLast()
                 } label: {
-                    Label("Undo last photo", systemImage: "arrow.uturn.backward")
+                    Label("Undo last swipe", systemImage: "arrow.uturn.backward")
                         .font(.headline)
                 }
                 .foregroundStyle(.white)
@@ -52,9 +52,9 @@ struct EndOfQueueView: View {
 
     private var emptyCopy: String {
         if viewModel.didCompleteReview {
-            return "You've reviewed every photo from \(viewModel.selectedDayTitle). Pick another day to keep going."
+            return "You've finished every photo from \(viewModel.selectedDayTitle). Pick another day to continue."
         }
-        return "No photos from \(viewModel.selectedDayTitle) across the years. Choose another day to keep curating."
+        return "There are no library photos from \(viewModel.selectedDayTitle) in any year. Pick another day to continue."
     }
 }
 

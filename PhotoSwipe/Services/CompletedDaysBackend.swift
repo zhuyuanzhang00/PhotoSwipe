@@ -18,21 +18,15 @@ final class CompletedDaysBackend {
         load()
     }
 
-    func contains(_ date: Date) -> Bool {
-        completedMonthDays.contains(PhotoDateFormat.monthDayKey(from: date))
-    }
-
     func markCompleted(_ date: Date) {
         let key = PhotoDateFormat.monthDayKey(from: date)
-        guard !completedMonthDays.contains(key) else { return }
-        completedMonthDays.insert(key)
+        guard completedMonthDays.insert(key).inserted else { return }
         save()
     }
 
     func unmark(_ date: Date) {
         let key = PhotoDateFormat.monthDayKey(from: date)
-        guard completedMonthDays.contains(key) else { return }
-        completedMonthDays.remove(key)
+        guard completedMonthDays.remove(key) != nil else { return }
         save()
     }
 
