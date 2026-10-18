@@ -5,6 +5,7 @@ import UIKit
 final class PhotoImageLoader {
     private let manager = PHCachingImageManager()
     private var cachedIdentifiers: [String] = []
+    private var cachedTargetSize: CGSize = .zero
 
     func request(
         _ asset: PHAsset,
@@ -12,13 +13,7 @@ final class PhotoImageLoader {
         contentMode: PHImageContentMode = .aspectFit,
         resultHandler: @escaping (UIImage?) -> Void
     ) -> PHImageRequestID {
-        let options = PHImageRequestOptions()
-        options.deliveryMode = .opportunistic
-        options.resizeMode = targetSize == PHImageManagerMaximumSize ? .none : .exact
-        options.isNetworkAccessAllowed = true
-        options.isSynchronous = false
-        options.version = .current
-
+        let options = makeOptions(targetSize: targetSize, deliveryMode: .opportunistic)
         return manager.requestImage(
             for: asset,
             targetSize: targetSize,
@@ -38,40 +33,31 @@ final class PhotoImageLoader {
     func cacheCurrentAndNext(_ items: [PhotoItem], targetSize: CGSize) {
         let assets = items.map(\.asset)
         let identifiers = assets.map(\.localIdentifier)
-        guard identifiers != cachedIdentifiers else { return }
+        let size = targetSize == .zero ? PHImageManagerMaximumSize : targetSize
+        guard identifiers != cachedIdentifiers || size != cachedTargetSize else { return }
 
         stopCaching()
         cachedIdentifiers = identifiers
+        cachedTargetSize = size
         guard !assets.isEmpty else { return }
-
-        let options = PHImageRequestOptions()
-        options.deliveryMode = .opportunistic
-        options.resizeMode = .none
-        options.isNetworkAccessAllowed = true
-        options.version = .current
 
         manager.startCachingImages(
             for: assets,
-            targetSize: PHImageManagerMaximumSize,
+            targetSize: size,
             contentMode: .aspectFit,
-            options: options
+            options: makeOptions(targetSize: size, deliveryMode: .opportunistic)
         )
     }
 
     func stopCaching() {
         manager.stopCachingImagesForAllAssets()
         cachedIdentifiers.removeAll()
+        cachedTargetSize = .zero
     }
 
     func exportForSharing(_ asset: PHAsset) async -> URL? {
         await withCheckedContinuation { continuation in
-            let options = PHImageRequestOptions()
-            options.deliveryMode = .highQualityFormat
-            options.resizeMode = .none
-            options.isNetworkAccessAllowed = true
-            options.isSynchronous = false
-            options.version = .current
-
+            let options = makeOptions(targetSize: PHImageManagerMaximumSize, deliveryMode: .highQualityFormat)
             var resumed = false
             manager.requestImageDataAndOrientation(for: asset, options: options) { data, uti, _, info in
                 let cancelled = (info?[PHImageCancelledKey] as? Bool) ?? false
@@ -96,10 +82,25 @@ final class PhotoImageLoader {
         }
     }
 
+    private func makeOptions(
+        targetSize: CGSize,
+        deliveryMode: PHImageRequestOptionsDeliveryMode
+    ) -> PHImageRequestOptions {
+        let options = PHImageRequestOptions()
+        options.deliveryMode = deliveryMode
+        options.resizeMode = targetSize == PHImageManagerMaximumSize ? .none : .exact
+        options.isNetworkAccessAllowed = true
+        options.isSynchronous = false
+        options.version = .current
+        return options
+    }
+
     private static func fileExtension(for uti: String?) -> String {
         switch uti {
-        case "public.png", "public.heic":
-            return uti == "public.png" ? "png" : "heic"
+        case "public.png":
+            return "png"
+        case "public.heic":
+            return "heic"
         default:
             return "jpg"
         }

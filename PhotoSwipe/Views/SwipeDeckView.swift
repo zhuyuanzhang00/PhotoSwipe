@@ -19,23 +19,12 @@ struct SwipeDeckView: View {
                 Color.black.ignoresSafeArea()
 
                 if let next = viewModel.nextPhoto {
-                    PhotoCardView(
-                        item: next,
-                        progressText: viewModel.progressText,
-                        loader: viewModel.imageLoader,
-                        dragOffset: .zero,
-                        showsChrome: false,
-                        canUndo: false,
-                        isSharing: false,
-                        onDelete: {},
-                        onUndo: {},
-                        onShare: {}
-                    )
-                    .id(next.id)
-                    .scaleEffect(0.96)
-                    .opacity(0.55)
-                    .padding(cardPadding)
-                    .allowsHitTesting(false)
+                    PhotoImageView(asset: next.asset, loader: viewModel.imageLoader)
+                        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                        .scaleEffect(0.96)
+                        .opacity(0.55)
+                        .padding(cardPadding)
+                        .allowsHitTesting(false)
                 }
 
                 if let current = viewModel.currentPhoto {
@@ -44,7 +33,6 @@ struct SwipeDeckView: View {
                         progressText: viewModel.progressText,
                         loader: viewModel.imageLoader,
                         dragOffset: dragOffset,
-                        showsChrome: true,
                         canUndo: viewModel.canUndo,
                         isSharing: isPreparingShare,
                         onDelete: { fling(.delete, width: proxy.size.width) },
@@ -76,8 +64,8 @@ struct SwipeDeckView: View {
     }
 
     private var deckHeader: some View {
-        HStack {
-            Button(action: onPickDay) {
+        Button(action: onPickDay) {
+            HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("On This Day")
                         .font(.headline)
@@ -86,34 +74,19 @@ struct SwipeDeckView: View {
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.7))
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Pick a day, currently \(viewModel.selectedDayTitle)")
 
-            if viewModel.canUndo {
-                Button(action: { undoLast() }) {
-                    Image(systemName: "arrow.uturn.backward")
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .background(.white.opacity(0.12), in: Circle())
-                }
-                .accessibilityLabel("Undo last swipe")
-                .padding(.trailing, 8)
-            }
+                Spacer(minLength: 12)
 
-            Button(action: onPickDay) {
-                Label("Pick a day", systemImage: "calendar")
-                    .labelStyle(.iconOnly)
+                Image(systemName: "calendar")
                     .font(.title3)
                     .foregroundStyle(.white)
                     .frame(width: 44, height: 44)
                     .background(.white.opacity(0.12), in: Circle())
             }
-            .accessibilityLabel("Pick a day")
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Pick a day, currently \(viewModel.selectedDayTitle)")
         .padding(.horizontal, 20)
         .padding(.top, 6)
         .padding(.bottom, 4)
@@ -158,10 +131,12 @@ struct SwipeDeckView: View {
             }
     }
 
+    /// Circle centered on the deck whose radius is 50% of the smaller screen dimension.
     private func isCenterTap(start: CGPoint, in size: CGSize) -> Bool {
-        let dx = abs(start.x - size.width / 2)
-        let dy = abs(start.y - size.height / 2)
-        return dx < size.width * 0.28 && dy < size.height * 0.22
+        let dx = start.x - size.width / 2
+        let dy = start.y - size.height / 2
+        let radius = 0.5 * min(size.width, size.height)
+        return hypot(dx, dy) <= radius
     }
 
     private func undoLast() {

@@ -14,7 +14,7 @@ struct ConfirmationView: View {
                             .font(.title2.weight(.semibold))
                             .foregroundStyle(.white)
 
-                        Text("These photos will be moved to Recently Deleted. You can recover them from the Photos app for 30 days.")
+                        Text("These photos will move to Recently Deleted in Photos, where you can recover them for 30 days.")
                             .font(.subheadline)
                             .foregroundStyle(.white.opacity(0.68))
 
@@ -86,7 +86,8 @@ struct ConfirmationView: View {
 
     private var headline: String {
         let count = viewModel.photosToDelete.count
-        let word = count == 1 ? "photo" : "photos"
-        return "\(count) \(word) marked for deletion"
+        return count == 1
+            ? "1 photo marked for deletion"
+            : "\(count) photos marked for deletion"
     }
 }

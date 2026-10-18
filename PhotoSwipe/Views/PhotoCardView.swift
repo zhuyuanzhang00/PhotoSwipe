@@ -5,14 +5,13 @@ struct PhotoCardView: View {
     let progressText: String
     let loader: PhotoImageLoader
     let dragOffset: CGSize
-    let showsChrome: Bool
     let canUndo: Bool
     let isSharing: Bool
     let onDelete: () -> Void
     let onUndo: () -> Void
     let onShare: () -> Void
 
-    @State private var locationText = "Location unavailable"
+    @State private var locationText = "Looking up location…"
 
     private var rotation: Double {
         Double(dragOffset.width / 18)
@@ -43,93 +42,77 @@ struct PhotoCardView: View {
             )
             .allowsHitTesting(false)
 
-            if showsChrome {
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(PhotoDateFormat.timestamp(from: item.creationDate))
-                                .font(.title3.weight(.semibold))
-                                .foregroundStyle(.white)
-                                .shadow(color: .black.opacity(0.45), radius: 6, y: 1)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(PhotoDateFormat.timestamp(from: item.creationDate))
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .shadow(color: .black.opacity(0.45), radius: 6, y: 1)
 
-                            Text(locationText)
-                                .font(.subheadline)
-                                .foregroundStyle(.white.opacity(0.84))
-                                .shadow(color: .black.opacity(0.45), radius: 6, y: 1)
-                        }
-
-                        Spacer(minLength: 12)
-
-                        Text(progressText)
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.white.opacity(0.9))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(.black.opacity(0.35), in: Capsule())
+                        Text(locationText)
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.84))
+                            .shadow(color: .black.opacity(0.45), radius: 6, y: 1)
                     }
 
-                    Spacer()
+                    Spacer(minLength: 12)
 
-                    HStack(spacing: 28) {
-                        Button(action: onUndo) {
-                            Image(systemName: "arrow.uturn.backward")
-                                .font(.title3.weight(.semibold))
-                                .foregroundStyle(.white)
-                                .frame(width: 56, height: 56)
-                                .background(.white.opacity(canUndo ? 0.22 : 0.1), in: Circle())
-                        }
-                        .disabled(!canUndo)
-                        .opacity(canUndo ? 1 : 0.4)
-                        .accessibilityLabel("Undo last swipe")
-
-                        Button(action: onShare) {
-                            Group {
-                                if isSharing {
-                                    ProgressView()
-                                        .tint(.white)
-                                } else {
-                                    Image(systemName: "square.and.arrow.up")
-                                        .font(.title3.weight(.semibold))
-                                        .foregroundStyle(.white)
-                                }
-                            }
-                            .frame(width: 56, height: 56)
-                            .background(.white.opacity(0.22), in: Circle())
-                        }
-                        .disabled(isSharing)
-                        .accessibilityLabel("Share photo")
-
-                        Button(action: onDelete) {
-                            Image(systemName: "trash.fill")
-                                .font(.title3.weight(.semibold))
-                                .foregroundStyle(.white)
-                                .frame(width: 56, height: 56)
-                                .background(.red.opacity(0.92), in: Circle())
-                                .shadow(color: .black.opacity(0.4), radius: 10, y: 4)
-                        }
-                        .accessibilityLabel("Mark photo for deletion")
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, 8)
+                    Text(progressText)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.9))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(.black.opacity(0.35), in: Capsule())
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 16)
-                .padding(.bottom, 24)
-            }
 
-            if showsChrome {
-                Color.clear
-                    .frame(maxWidth: 240, maxHeight: 200)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        if canUndo {
-                            onUndo()
-                        }
+                Spacer()
+
+                HStack(spacing: 28) {
+                    Button(action: onUndo) {
+                        Image(systemName: "arrow.uturn.backward")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 56, height: 56)
+                            .background(.white.opacity(canUndo ? 0.22 : 0.1), in: Circle())
                     }
+                    .disabled(!canUndo)
+                    .opacity(canUndo ? 1 : 0.4)
                     .accessibilityLabel("Undo last swipe")
-                    .accessibilityAddTraits(.isButton)
-                    .accessibilityHidden(!canUndo)
+
+                    Button(action: onShare) {
+                        Group {
+                            if isSharing {
+                                ProgressView()
+                                    .tint(.white)
+                            } else {
+                                Image(systemName: "square.and.arrow.up")
+                                    .font(.title3.weight(.semibold))
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .frame(width: 56, height: 56)
+                        .background(.white.opacity(0.22), in: Circle())
+                    }
+                    .disabled(isSharing)
+                    .accessibilityLabel("Share photo")
+
+                    Button(action: onDelete) {
+                        Image(systemName: "trash.fill")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 56, height: 56)
+                            .background(.red.opacity(0.92), in: Circle())
+                            .shadow(color: .black.opacity(0.4), radius: 10, y: 4)
+                    }
+                    .accessibilityLabel("Mark photo for deletion")
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 8)
             }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 24)
 
             stamp(text: "DELETE", color: .red, opacity: deleteOpacity, rotation: -18)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
